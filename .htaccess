@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Servir la aplicación y sus archivos públicos desde public/.
+    RewriteRule ^(?!public(?:/|$))(.*)$ public/$1 [L,NC]
+</IfModule>
