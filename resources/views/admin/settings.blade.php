@@ -1,0 +1,25 @@
+@extends('layout')
+@section('title', 'Configuración')
+@section('content')
+<a href="{{ route('admin.index') }}">← Administración</a><h1>Configuración de la tienda</h1>
+<form method="post" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">@csrf @method('PUT')
+<section class="card"><h2>Identidad y SEO</h2>
+<label for="site_title">Título de la página</label><input id="site_title" name="site_title" maxlength="100" required value="{{ old('site_title', $settings->site_title) }}">
+<label for="seo_description">Descripción para buscadores</label><textarea id="seo_description" name="seo_description" maxlength="320">{{ old('seo_description', $settings->seo_description) }}</textarea>
+<label for="logo">Logotipo (PNG, JPG o WebP; hasta 2 MB)</label><input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp">@if($settings->logo_path)<p>Logotipo actual: <img src="{{ route('settings.image', ['type' => 'logo', 'v' => $settings->updated_at?->timestamp]) }}" alt="Logotipo actual" style="max-height:50px;max-width:200px;vertical-align:middle"></p><label><input type="checkbox" name="remove_logo" value="1"> Quitar logotipo</label>@endif
+<label for="favicon">Icono de pestaña (PNG; hasta 512 KB)</label><input id="favicon" name="favicon" type="file" accept="image/png">@if($settings->favicon_path)<label><input type="checkbox" name="remove_favicon" value="1"> Quitar icono</label>@endif</section>
+<section class="card"><h2>Correo SMTP</h2><p class="muted">Se utiliza para recuperar contraseñas. Guarda la configuración antes de probarla.</p>
+<label for="smtp_host">Servidor</label><input id="smtp_host" name="smtp_host" value="{{ old('smtp_host', $settings->smtp_host) }}" placeholder="smtp.ejemplo.com">
+<label for="smtp_port">Puerto</label><input id="smtp_port" name="smtp_port" type="number" min="1" max="65535" value="{{ old('smtp_port', $settings->smtp_port) }}" placeholder="587">
+<label for="smtp_scheme">Seguridad</label><select id="smtp_scheme" name="smtp_scheme"><option value="smtp" @selected(old('smtp_scheme', $settings->smtp_scheme) === 'smtp')>STARTTLS (habitualmente 587)</option><option value="smtps" @selected(old('smtp_scheme', $settings->smtp_scheme) === 'smtps')>TLS directo (habitualmente 465)</option></select>
+<label for="smtp_username">Usuario SMTP</label><input id="smtp_username" name="smtp_username" value="{{ old('smtp_username', $settings->smtp_username) }}" autocomplete="off">
+<label for="smtp_password">Contraseña SMTP</label><input id="smtp_password" name="smtp_password" type="password" autocomplete="new-password" placeholder="{{ $settings->smtp_password ? 'Guardada; deja vacío para conservar' : 'Sin configurar' }}">@if($settings->smtp_password)<label><input type="checkbox" name="clear_smtp_password" value="1"> Borrar contraseña guardada</label>@endif
+<label for="mail_from_address">Correo remitente</label><input id="mail_from_address" name="mail_from_address" type="email" value="{{ old('mail_from_address', $settings->mail_from_address) }}">
+<label for="mail_from_name">Nombre remitente</label><input id="mail_from_name" name="mail_from_name" value="{{ old('mail_from_name', $settings->mail_from_name) }}"></section>
+<section class="card"><h2>Mercado Pago</h2><p class="muted">Introduce las credenciales del mismo entorno en Mercado Pago. El webhook debe apuntar a una URL pública HTTPS que termine en <code>/pagos/mercadopago/notificacion</code>.</p>
+<p><a class="button secondary" href="https://www.mercadopago.com.pe/developers/panel/app" target="_blank" rel="noopener noreferrer">Abrir panel de Mercado Pago ↗</a></p>
+<label for="mercadopago_access_token">Access token</label><input id="mercadopago_access_token" name="mercadopago_access_token" type="password" autocomplete="new-password" placeholder="{{ $settings->mercadopago_access_token ? 'Guardado; deja vacío para conservar' : 'Sin configurar' }}">@if($settings->mercadopago_access_token)<label><input type="checkbox" name="clear_mercadopago_access_token" value="1"> Borrar token guardado</label>@endif
+<label for="mercadopago_webhook_secret">Clave secreta del webhook</label><input id="mercadopago_webhook_secret" name="mercadopago_webhook_secret" type="password" autocomplete="new-password" placeholder="{{ $settings->mercadopago_webhook_secret ? 'Guardada; deja vacío para conservar' : 'Sin configurar' }}">@if($settings->mercadopago_webhook_secret)<label><input type="checkbox" name="clear_mercadopago_webhook_secret" value="1"> Borrar clave guardada</label>@endif</section>
+<p><button type="submit">Guardar configuración</button></p></form>
+<section class="card"><h2>Probar correo</h2><p class="muted">El envío utiliza los datos SMTP guardados.</p><form method="post" action="{{ route('admin.settings.test-mail') }}">@csrf<label for="test_email">Correo de destino</label><input id="test_email" name="email" type="email" value="{{ old('email', auth()->user()->email) }}" required><p><button type="submit">Enviar correo de prueba</button></p></form></section>
+@endsection
